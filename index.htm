@@ -14,20 +14,26 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-        overflow: hidden;
+        min-height: 100vh;
+        overflow-y: auto; /* allow scrolling on small screens */
+        padding: 20px;
+        box-sizing: border-box;
       }
 
       h1 {
         font-size: 2.5em;
         margin-bottom: 10px;
         animation: fadeIn 2s ease-in-out;
+        text-align: center;
+        word-break: break-word;
       }
 
       h2 {
         font-size: 1.5em;
         margin-bottom: 20px;
         animation: fadeIn 3s ease-in-out;
+        text-align: center;
+        word-break: break-word;
       }
 
       .textLove {
@@ -36,17 +42,19 @@
         font-size: 1.2em;
         animation: fadeIn 4s ease-in-out;
         text-align: center;
+        max-width: min(600px, 90vw);
+        padding: 0 12px;
       }
 
       .slideshow-container {
         width: min(420px, 92vw);
-        /* maintain aspect ratio and be responsive */
         aspect-ratio: 7 / 5;
         max-height: 68vh;
         border-radius: 15px;
         overflow: hidden;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         position: relative;
+        background: #000;
       }
 
       .slide {
@@ -56,6 +64,8 @@
         opacity: 0;
         transition: opacity 1s ease-in-out;
         object-fit: cover; /* ensure images cover the container */
+        display: block;
+        inset: 0;
       }
 
       .slide.active {
@@ -99,6 +109,7 @@
         background-color: #ffb6c1;
         transform: rotate(45deg);
         animation: floatingHearts 5s linear infinite;
+        pointer-events: none;
       }
 
       .heart::before,
@@ -119,6 +130,71 @@
       .heart::after {
         left: 10px;
         top: 0;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 900px) {
+        h1 {
+          font-size: 2.1rem;
+        }
+        h2 {
+          font-size: 1.2rem;
+        }
+        .slideshow-container {
+          width: min(520px, 94vw);
+          aspect-ratio: 4 / 3;
+          max-height: 60vh;
+        }
+        .textLove {
+          font-size: 1.05em;
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          justify-content: flex-start;
+          padding-top: 28px;
+        }
+        h1 {
+          font-size: 1.6rem;
+          margin-bottom: 6px;
+        }
+        h2 {
+          font-size: 1.05rem;
+          margin-bottom: 12px;
+        }
+        .slideshow-container {
+          width: 96vw;
+          aspect-ratio: 4 / 3;
+          max-height: 55vh;
+          border-radius: 12px;
+        }
+        .textLove {
+          position: static;
+          bottom: auto;
+          margin-top: 12px;
+          font-size: 1rem;
+        }
+        .heart {
+          width: 12px;
+          height: 12px;
+        }
+        .heart::before,
+        .heart::after {
+          width: 12px;
+          height: 12px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .slide,
+        .heart,
+        h1,
+        h2,
+        .textLove {
+          animation: none !important;
+          transition: none !important;
+        }
       }
     </style>
   </head>
@@ -165,13 +241,24 @@
       function createHeart() {
         const heart = document.createElement("div");
         heart.classList.add("heart");
-        heart.style.left = Math.random() * 100 + "vw";
-        heart.style.animationDuration = Math.random() * 3 + 3 + "s";
+
+        // place heart fully inside viewport to avoid partial clipping
+        const maxLeft = Math.max(window.innerWidth - 40, 40);
+        heart.style.left = Math.floor(Math.random() * maxLeft) + "px";
+
+        // vary size and speed a bit
+        const size = Math.random() * 10 + 10; // 10-20px
+        heart.style.width = size + "px";
+        heart.style.height = size + "px";
+        heart.style.animationDuration = (Math.random() * 3 + 3).toFixed(2) + "s";
+        heart.style.opacity = (Math.random() * 0.4 + 0.6).toFixed(2);
+
         document.body.appendChild(heart);
 
+        // remove after animation ends
         setTimeout(() => {
           heart.remove();
-        }, 5000);
+        }, 7000);
       }
 
       // adapt heart spawn rate to viewport size to avoid overload on small screens
