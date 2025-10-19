@@ -14,10 +14,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
-        overflow-y: auto; /* allow scrolling on small screens */
-        padding: 20px;
-        box-sizing: border-box;
+        height: 100vh;
+        overflow: hidden;
       }
 
       h1 {
@@ -274,6 +272,43 @@
       window.addEventListener("resize", () => {
         startHeartInterval();
       });
+
+      // thử play ngay — nếu bị chặn sẽ rejection
+      const bgMusic = document.getElementById("bgMusic");
+
+      async function tryPlay() {
+        if (!bgMusic) return;
+        try {
+          await bgMusic.play();
+          console.log("Audio autoplay started (muted).");
+        } catch (err) {
+          console.warn("Autoplay blocked:", err);
+        }
+      }
+
+      tryPlay();
+
+      // Khi người dùng tương tác bất kỳ (click/touch/keydown), unmute và play (một lần)
+      function unlockAudio() {
+        if (!bgMusic) return;
+        bgMusic.muted = false;
+        bgMusic.play().then(() => {
+          console.log("Audio unmuted and playing after user gesture.");
+        }).catch((err) => {
+          console.warn("Play after gesture failed:", err);
+        });
+        // loại bỏ listener sau khi đã thực hiện
+        document.removeEventListener("click", unlockAudio);
+        document.removeEventListener("touchstart", unlockAudio);
+        document.removeEventListener("keydown", unlockAudio);
+      }
+
+      document.addEventListener("click", unlockAudio, { once: true });
+      document.addEventListener("touchstart", unlockAudio, { once: true });
+      document.addEventListener("keydown", unlockAudio, { once: true });
+
+      // Debug: kiểm tra đường dẫn trên deploy nếu không chạy
+      // Từ devcontainer: curl -I https://USERNAME.github.io/REPO/images/noi-nay-co-anh.mp3
     </script>
   </body>
 </html>
